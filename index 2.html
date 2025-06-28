@@ -1,0 +1,115 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MinerMAX - Terminal Miner</title>
+  <style>
+    body {
+      background: #000;
+      color: #00ff00;
+      font-family: monospace;
+      padding: 1rem;
+      white-space: pre;
+    }
+    #output {
+      line-height: 1.5;
+    }
+    input, button {
+      background: #111;
+      color: #0f0;
+      border: 1px solid #0f0;
+      padding: 4px 8px;
+      font-family: monospace;
+    }
+    .hidden { display: none; }
+  </style>
+</head>
+<body>
+  <div id="output"></div>
+  <div id="inputSection">
+    <br>
+    Miner IDs (comma-separated): <input id="minerInput" type="text" placeholder="e.g. Z5XGT3EO,J0J8LTWT">
+    <button onclick="startMining()">Start Mining</button>
+  </div>
+
+  <script>
+    const output = document.getElementById("output");
+    const host = "https://api.starch.one";
+    const color = "#FF0000";
+    let minerIds = [];
+    let interval;
+
+    function log(msg) {
+      output.innerText += `\n${msg}`;
+      output.scrollTop = output.scrollHeight;
+    }
+
+    async function getLastBlock() {
+      try {
+        const res = await fetch(`${host}/blockchain/last_block`);
+        return await res.json();
+      } catch (err) {
+        log("❌ Failed to fetch last block.");
+        return {};
+      }
+    }
+
+    async function solve(minerId, lastHash) {
+      const str = `${lastHash} ${minerId} ${color}`;
+      const encoder = new TextEncoder();
+      const data = encoder.encode(str);
+      const hashBuffer = await crypto.subtle.digest("SHA-256", data);
+      return [...new Uint8Array(hashBuffer)].map(b => b.toString(16).padStart(2, '0')).join('');
+    }
+
+    async function submitBlocks(blocks) {
+      try {
+        const res = await fetch(`${host}/submit_blocks`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ blocks })
+        });
+        return await res.json();
+      } catch (e) {
+        log("❌ Submission failed.");
+        return {};
+      }
+    }
+
+    async function mineCycle() {
+      const block = await getLastBlock();
+      if (!block.hash) return;
+      log("⛏️ Mining new block...");
+
+      const blocks = [];
+      for (const id of minerIds) {
+        const hash = await solve(id, block.hash);
+        blocks.push({ hash, miner_id: id, color });
+        log(`> ${id} | hash: ${hash.slice(0, 12)}...`);
+      }
+
+      const result = await submitBlocks(blocks);
+      log(`✅ Submitted ${blocks.length} blocks. Accepted: ${result.accepted || 0}`);
+    }
+
+    function startMining() {
+      const input = document.getElementById("minerInput").value;
+      minerIds = input.split(",").map(s => s.trim().toUpperCase()).filter(s => s);
+      if (minerIds.length === 0) return alert("Enter at least one miner ID.");
+      document.getElementById("inputSection").classList.add("hidden");
+      log("███████████████████████████████████████████████████████████████████████");
+      log("███╗   ███╗██╗███╗   ██╗███████╗███╗   ███╗███████╗ █████╗  ██████╗██╗  ██╗");
+      log("████╗ ████║██║████╗  ██║██╔════╝████╗ ████║██╔════╝██╔══██╗██╔════╝██║ ██╔╝");
+      log("██╔████╔██║██║██╔██╗ ██║█████╗  ██╔████╔██║█████╗  ███████║██║     █████╔╝ ");
+      log("██║╚██╔╝██║██║██║╚██╗██║██╔══╝  ██║╚██╔╝██║██╔══╝  ██╔══██║██║     ██╔═██╗ ");
+      log("██║ ╚═╝ ██║██║██║ ╚████║███████╗██║ ╚═╝ ██║███████╗██║  ██║╚██████╗██║  ██╗");
+      log("╚═╝     ╚═╝╚═╝╚═╝  ╚═══╝╚══════╝╚═╝     ╚═╝╚══════╝╚═╝  ╚═╝ ╚═════╝╚═╝  ╚═╝");
+      log("───────────────────────────── MINERMAX ─────────────────────────────");
+      mineCycle();
+      interval = setInterval(mineCycle, 49000);
+    }
+  </script>
+</body>
+</html>
