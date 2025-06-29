@@ -14,7 +14,7 @@
     }
     #output {
       line-height: 1.5;
-      max-height: 80vh;
+      max-height: 70vh;
       overflow-y: auto;
     }
     input, button {
@@ -23,16 +23,26 @@
       border: 1px solid #0f0;
       padding: 4px 8px;
       font-family: monospace;
+      margin: 4px 0;
     }
     .hidden { display: none; }
+    .section { margin-bottom: 1rem; }
   </style>
 </head>
 <body>
   <div id="output"></div>
-  <div id="inputSection">
+
+  <div class="section" id="inputSection">
     <br>
-    Miner IDs (comma-separated): <input id="minerInput" type="text" placeholder="e.g. Z5XGT3EO,J0J8LTWT">
+    <label>Miner IDs (comma-separated):</label><br>
+    <input id="minerInput" type="text" placeholder="e.g. Z5XGT3EO,J0J8LTWT">
     <button onclick="startMining()">Start Mining</button>
+  </div>
+
+  <div class="section" id="statsSection">
+    <label>Check Stats for a Miner:</label><br>
+    <input id="statsInput" type="text" placeholder="e.g. JQIM3JXI">
+    <button onclick="fetchStats()">Check Stats</button>
   </div>
 
   <script>
@@ -76,7 +86,7 @@
         if (result.accepted && result.accepted > 0) {
           const timestamp = new Date().toLocaleString();
           log(`🎉 ${timestamp} | Accepted blocks: ${result.accepted}`);
-          result.accepted_blocks?.forEach((b, idx) => {
+          result.accepted_blocks?.forEach((b) => {
             log(`✅ Miner: ${b.miner_id} | Hash: ${b.hash.slice(0, 12)}...`);
           });
         }
@@ -101,6 +111,22 @@
 
       const result = await submitBlocks(blocks);
       log(`✅ Submitted ${blocks.length} blocks. Accepted: ${result.accepted || 0}`);
+    }
+
+    async function fetchStats() {
+      const minerId = document.getElementById("statsInput").value.trim().toUpperCase();
+      if (!minerId) return alert("Enter a miner ID to check stats.");
+      try {
+        const res = await fetch(`${host}/miner/${minerId}`);
+        if (!res.ok) throw new Error("Miner not found");
+        const data = await res.json();
+        log(`📊 Stats for ${minerId}`);
+        log(`  Total STRCH earned: ${data.total_strch}`);
+        log(`  Total blocks mined: ${data.total_blocks}`);
+        if (data.last_block_time) log(`  Last mined at: ${new Date(data.last_block_time).toLocaleString()}`);
+      } catch (err) {
+        log(`❌ Failed to fetch stats for ${minerId}`);
+      }
     }
 
     function startMining() {
