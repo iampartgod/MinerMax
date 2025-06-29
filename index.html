@@ -16,6 +16,9 @@
       line-height: 1.5;
       max-height: 70vh;
       overflow-y: auto;
+      border-bottom: 1px solid #0f0;
+      padding-bottom: 1rem;
+      margin-bottom: 1rem;
     }
     input, button {
       background: #111;
@@ -23,7 +26,8 @@
       border: 1px solid #0f0;
       padding: 4px 8px;
       font-family: monospace;
-      margin: 4px 0;
+      margin: 4px 4px 4px 0;
+      display: inline-block;
     }
     .hidden { display: none; }
     .section { margin-bottom: 1rem; }
@@ -33,14 +37,13 @@
   <div id="output"></div>
 
   <div class="section" id="inputSection">
-    <br>
-    <label>Miner IDs (comma-separated):</label><br>
+    <label>🟢 Miner IDs (comma-separated):</label><br>
     <input id="minerInput" type="text" placeholder="e.g. Z5XGT3EO,J0J8LTWT">
     <button onclick="startMining()">Start Mining</button>
   </div>
 
   <div class="section" id="statsSection">
-    <label>Check Stats for a Miner:</label><br>
+    <label>📊 Check Stats for a Miner:</label><br>
     <input id="statsInput" type="text" placeholder="e.g. JQIM3JXI">
     <button onclick="fetchStats()">Check Stats</button>
   </div>
@@ -113,22 +116,6 @@
       log(`✅ Submitted ${blocks.length} blocks. Accepted: ${result.accepted || 0}`);
     }
 
-    async function fetchStats() {
-      const minerId = document.getElementById("statsInput").value.trim().toUpperCase();
-      if (!minerId) return alert("Enter a miner ID to check stats.");
-      try {
-        const res = await fetch(`${host}/miner/${minerId}`);
-        if (!res.ok) throw new Error("Miner not found");
-        const data = await res.json();
-        log(`📊 Stats for ${minerId}`);
-        log(`  Total STRCH earned: ${data.total_strch}`);
-        log(`  Total blocks mined: ${data.total_blocks}`);
-        if (data.last_block_time) log(`  Last mined at: ${new Date(data.last_block_time).toLocaleString()}`);
-      } catch (err) {
-        log(`❌ Failed to fetch stats for ${minerId}`);
-      }
-    }
-
     function startMining() {
       const input = document.getElementById("minerInput").value;
       minerIds = input.split(",").map(s => s.trim().toUpperCase()).filter(s => s);
@@ -141,9 +128,27 @@
       log("██║╚██╔╝██║██║██║╚██╗██║██║╚═╝██║██║╚██╔╝██║██╔══╝  ██║╚██╔╝██║██╔══██║██╔═██╗ ");
       log("██║ ╚═╝ ██║██║██║ ╚████║██║   ██║██║ ╚═╝ ██║███████╗██║ ╚═╝ ██║██║  ██║██║  ██╗");
       log("╚═╝     ╚═╝╚═╝╚═╝  ╚═══╝╚═╝   ╚═╝╚═╝     ╚═╝╚══════╝╚═╝     ╚═╝╚═╝  ╚═╝╚═╝  ╚═╝");
-      log("───────────── Service by IAmPartGod | Tips: $badhabits ─ View miner stats anytime at starch.one ─────────────");
+      log("───── Powered by IAmPartGod | Tips: $badhabits ─ View miner stats at starch.one ─────");
       mineCycle();
       interval = setInterval(mineCycle, 49000);
+    }
+
+    async function fetchStats() {
+      const minerId = document.getElementById("statsInput").value.trim().toUpperCase();
+      if (!minerId) return alert("Enter a miner ID to check stats.");
+      try {
+        const res = await fetch(`${host}/miner/${minerId}`);
+        if (!res.ok) throw new Error("Miner not found");
+        const data = await res.json();
+        log(`📊 Stats for ${minerId}`);
+        log(`  Total STRCH earned: ${data.total_strch}`);
+        log(`  Total blocks mined: ${data.total_blocks}`);
+        if (data.last_block_time) {
+          log(`  Last mined at: ${new Date(data.last_block_time).toLocaleString()}`);
+        }
+      } catch (err) {
+        log(`❌ Failed to fetch stats for ${minerId}`);
+      }
     }
   </script>
 </body>
