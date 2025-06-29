@@ -4,4 +4,4 @@ A mining management tool for individual Starch.one miners, designed to handle mu
 - Mine and track block submissions for multiple miners (no known limit).
 - Clear and concise visual on what's going on - right infront of you.
 
-# This is under continuous front-end improvement and back-end development, and as such, is subject to updates at any given time(s). It it generally recommended to restart your auto-mining operations by re-clicking "Start Mining" atleast every 24-48 hours.
+# This is under continuous front-end improvement and back-end development, and as such, is subject to updates at any given time(s). It it generally recommended to restart your auto-mining operations by refreshing the page, re-clicking "Start Mining" atleast every 24-48 hours.
