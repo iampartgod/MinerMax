@@ -27,16 +27,14 @@
       margin-bottom: 1rem;
     }
 
-    input, button, select {
+    input, button {
       background: #1a1a1a;
       color: #FFD700;
       border: 2px solid #FFD700;
-      padding: 10px 14px;
-      margin: 6px 0;
+      padding: 6px 12px;
+      margin: 6px 4px 6px 0;
       font-family: 'VT323', monospace;
-      font-size: 20px;
-      width: 100%;
-      box-sizing: border-box;
+      font-size: 18px;
     }
 
     button:hover {
@@ -75,13 +73,12 @@
       padding: 1rem;
     }
 
-    #minerStats, #calcResult {
+    #minerStats, #calcResults {
       background: #111;
       border: 1px solid #444;
-      padding: 1rem;
+      padding: 0.5rem 1rem;
       margin-top: 1rem;
-      font-size: 1.1rem;
-      white-space: pre-line;
+      font-size: 1rem;
     }
 
     .ascii {
@@ -122,14 +119,16 @@
       position: fixed;
       bottom: 20px;
       right: 20px;
-      background: #1a1a1a;
+      background-color: #1a1a1a;
+      color: #FFD700;
       border: 2px solid #FFD700;
-      padding: 10px 16px;
-      font-size: 18px;
+      padding: 8px 14px;
+      font-size: 16px;
       font-family: 'VT323', monospace;
       cursor: pointer;
-      z-index: 10;
+      box-shadow: 0 0 8px #FFD700;
     }
+
     #backToTop:hover {
       background: #FFD700;
       color: #1a1a1a;
@@ -140,7 +139,8 @@
   <div class="animated-bg"></div>
 
   <h1>
-    <img src="https://cdn.dripdropz.io/token-logos/3d77d63dfa6033be98021417e08e3368cc80e67f8d7afa196aaa0b39.53746172636820546f6b656e-1704742254.5594.png" alt="Starch Token Logo" /> MinerMAX Auto-Miner Terminal 
+    <img src="https://cdn.dripdropz.io/token-logos/3d77d63dfa6033be98021417e08e3368cc80e67f8d7afa196aaa0b39.53746172636820546f6b656e-1704742254.5594.png" alt="Starch Token Logo" />
+    MinerMAX Auto-Miner Terminal 
   </h1>
 
   <div class="ascii">[BOOTING MINERMAX...]
@@ -152,7 +152,7 @@
 
   <div class="section" id="inputSection">
     <label>🔧 Enter Miner IDs (comma-separated, ensure spelling accuracy)</label>
-    <input id="minerInput" type="text" placeholder="e.g. Z5XGT3EO, J0J8LTWT, etc">
+    <input id="minerInput" type="text" placeholder="e.g. Z5XGT3EO,J0J8LTWT">
     <button onclick="startMining()">Start Mining</button>
   </div>
 
@@ -164,6 +164,15 @@
 
   <div id="minerStats" class="hidden"></div>
 
+  <!-- Starch Rewards Calculator -->
+  <div class="section">
+    <label>🧮 Starch Rewards Calculator</label>
+    <input id="blocksInput" type="number" placeholder="Blocks mined this epoch">
+    <input id="iprcInput" type="number" placeholder="IPRC reward per block (optional)">
+    <button onclick="calculateRewards()">Calculate Rewards</button>
+    <div id="calcResults"></div>
+  </div>
+
   <!-- Spinning Potato -->
   <div class="center">
     <img id="spinningPotato" src="https://media.tenor.com/xG5vORIFsCkAAAAi/potato-chips.gif" alt="Mining..." class="potato" />
@@ -174,18 +183,10 @@
     <label>💸 Tip jarski <strong>$badhabits</strong></label>
   </div>
 
-  <!-- Rewards Calculator -->
-  <div class="section">
-    <label>🧮 STRCH Rewards Calculator</label>
-    <input type="number" id="numBlocks" placeholder="Blocks mined (epoch)">
-    <input type="number" id="rewardPerBlock" placeholder="Reward per block (e.g. 12500000)">
-    <input type="number" id="iprcBonus" placeholder="IPRC reward per block (optional)">
-    <button onclick="calculateRewards()">Calculate Total STRCH</button>
-    <div id="calcResult"></div>
-  </div>
-
   <!-- Back to Top Button -->
-  <button id="backToTop" onclick="scrollToTop()">⬆ Back to Top</button>
+  <button id="backToTop" onclick="window.scrollTo({ top: 0, behavior: 'smooth' });">
+    ⬆ Back to Top
+  </button>
 
   <script>
     const output = document.getElementById("output");
@@ -287,19 +288,11 @@
     }
 
     function calculateRewards() {
-      const blocks = parseInt(document.getElementById("numBlocks").value);
-      const reward = parseInt(document.getElementById("rewardPerBlock").value);
-      const iprc = parseInt(document.getElementById("iprcBonus").value || 0);
-      if (isNaN(blocks) || isNaN(reward)) {
-        document.getElementById("calcResult").innerText = "⚠️ Enter valid numbers for blocks and reward per block.";
-        return;
-      }
-      const total = blocks * (reward + iprc);
-      document.getElementById("calcResult").innerText = `🎯 Total Estimated STRCH: ${total.toLocaleString()}`;
-    }
-
-    function scrollToTop() {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      const blocks = parseInt(document.getElementById("blocksInput").value) || 0;
+      const iprc = parseInt(document.getElementById("iprcInput").value) || 0;
+      const baseReward = 12500000;
+      const total = blocks * (baseReward + iprc);
+      document.getElementById("calcResults").innerText = `🎯 Estimated Total: ${total.toLocaleString()} STRCH`;
     }
   </script>
 </body>
