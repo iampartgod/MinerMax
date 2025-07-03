@@ -5,61 +5,103 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>MinerMAX Dashboard</title>
   <style>
+    @import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
+
     body {
-      background: linear-gradient(to right, #111, #000);
-      color: #00ffcc;
-      font-family: 'Courier New', Courier, monospace;
+      background: linear-gradient(135deg, #0a0a0a, #1a1a1a);
+      color: #FFD700;
+      font-family: 'VT323', monospace;
       padding: 2rem;
       overflow-x: hidden;
     }
     #output {
-      background-color: #000;
-      color: #0f0;
-      border: 2px solid #0f0;
+      background-color: #111;
+      color: #FFD700;
+      border: 2px solid #444;
       padding: 1rem;
       max-height: 60vh;
       overflow-y: auto;
       white-space: pre-wrap;
-      box-shadow: 0 0 10px #0f0;
+      box-shadow: 0 0 8px #FFD700;
       margin-bottom: 1rem;
     }
     input, button {
-      background: #000;
-      color: #0ff;
-      border: 2px solid #0ff;
+      background: #1a1a1a;
+      color: #FFD700;
+      border: 2px solid #FFD700;
       padding: 6px 12px;
       margin: 6px 4px 6px 0;
-      font-family: monospace;
-      font-size: 14px;
+      font-family: 'VT323', monospace;
+      font-size: 18px;
     }
     button:hover {
-      background: #0ff;
-      color: #000;
+      background: #FFD700;
+      color: #1a1a1a;
       cursor: pointer;
     }
     label {
       display: block;
       margin-top: 1rem;
-      color: #0ff;
+      color: #FFD700;
       font-weight: bold;
     }
     .section {
       margin-bottom: 1.5rem;
     }
     h1 {
-      color: #0ff;
-      text-shadow: 0 0 10px #0ff;
-      font-size: 2rem;
+      color: #FFD700;
+      text-shadow: 0 0 10px #FFD700;
+      font-size: 2.5rem;
       margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+    h1 img {
+      height: 48px;
     }
     .terminal-border {
-      border: 1px dashed #0f0;
+      border: 1px dashed #444;
       padding: 1rem;
+    }
+    #minerStats {
+      background: #111;
+      border: 1px solid #444;
+      padding: 0.5rem 1rem;
+      margin-top: 1rem;
+      font-size: 1rem;
+    }
+    .ascii {
+      color: #888;
+      font-size: 12px;
+      margin-bottom: 1rem;
+    }
+    .logo {
+      height: 40px;
+      vertical-align: middle;
+    }
+    .animated-bg {
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      z-index: -1;
+      background: url('https://starch.one/assets/images/bg_dust.png');
+      background-size: cover;
+      opacity: 0.04;
     }
   </style>
 </head>
 <body>
-  <h1>🚀 MinerMAX Terminal UI</h1>
+  <div class="animated-bg"></div>
+
+  <h1>
+    <img src="https://starch.one/favicon.png" alt="Starch Logo" /> MinerMAX Terminal
+  </h1>
+
+  <div class="ascii">[BOOTING MINERMAX...]
+[✓] Authenticating with starch.one
+[✓] Fetching potato dust calibration
+[✓] Loading miner profile modules...</div>
+
   <div id="output" class="terminal-border"></div>
 
   <div class="section" id="inputSection">
@@ -73,6 +115,8 @@
     <input id="statsInput" type="text" placeholder="e.g. JQIM3JXI">
     <button onclick="fetchStats()">Check Stats</button>
   </div>
+
+  <div id="minerStats" class="hidden"></div>
 
   <script>
     const output = document.getElementById("output");
@@ -126,6 +170,24 @@
       }
     }
 
+    async function fetchStats() {
+      const minerId = document.getElementById("statsInput").value.trim().toUpperCase();
+      if (!minerId) return alert("Enter a miner ID to check stats.");
+      const statsDiv = document.getElementById("minerStats");
+
+      try {
+        const res = await fetch(`${host}/miner/${minerId}`);
+        const data = await res.json();
+        if (!data || !data.blocks) throw Error("Invalid response");
+
+        statsDiv.classList.remove("hidden");
+        statsDiv.innerHTML = `📌 Miner ${minerId} has mined ${data.blocks.length} blocks this epoch.`;
+      } catch (err) {
+        statsDiv.classList.remove("hidden");
+        statsDiv.innerHTML = `❌ Failed to fetch stats for ${minerId}`;
+      }
+    }
+
     async function mineCycle() {
       const block = await getLastBlock();
       if (!block.hash) return;
@@ -150,13 +212,6 @@
       log("🧠 Starting MinerMAX...");
       mineCycle();
       interval = setInterval(mineCycle, 49000);
-    }
-
-    function fetchStats() {
-      const minerId = document.getElementById("statsInput").value.trim().toUpperCase();
-      if (!minerId) return alert("Enter a miner ID to check stats.");
-      const url = `https://starch.one/miner/${minerId}`;
-      window.open(url, '_blank');
     }
   </script>
 </body>
