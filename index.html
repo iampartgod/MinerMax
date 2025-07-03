@@ -1,37 +1,77 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>MinerMAX - Auto Spud Miner</title>
+  <title>MinerMAX Dashboard</title>
   <style>
     body {
-      background: #000;
-      color: #00ff00;
-      font-family: monospace;
-      padding: 1rem;
-      white-space: pre;
+      background: linear-gradient(to right, #111, #000);
+      color: #00ffcc;
+      font-family: 'Courier New', Courier, monospace;
+      padding: 2rem;
+      overflow-x: hidden;
     }
     #output {
-      line-height: 1.5;
+      background-color: #000;
+      color: #0f0;
+      border: 2px solid #0f0;
+      padding: 1rem;
+      max-height: 60vh;
+      overflow-y: auto;
+      white-space: pre-wrap;
+      box-shadow: 0 0 10px #0f0;
+      margin-bottom: 1rem;
     }
     input, button {
-      background: #111;
-      color: #0f0;
-      border: 1px solid #0f0;
-      padding: 4px 8px;
+      background: #000;
+      color: #0ff;
+      border: 2px solid #0ff;
+      padding: 6px 12px;
+      margin: 6px 4px 6px 0;
       font-family: monospace;
+      font-size: 14px;
     }
-    .hidden { display: none; }
+    button:hover {
+      background: #0ff;
+      color: #000;
+      cursor: pointer;
+    }
+    label {
+      display: block;
+      margin-top: 1rem;
+      color: #0ff;
+      font-weight: bold;
+    }
+    .section {
+      margin-bottom: 1.5rem;
+    }
+    h1 {
+      color: #0ff;
+      text-shadow: 0 0 10px #0ff;
+      font-size: 2rem;
+      margin-bottom: 1rem;
+    }
+    .terminal-border {
+      border: 1px dashed #0f0;
+      padding: 1rem;
+    }
   </style>
 </head>
 <body>
-  <div id="output"></div>
-  <div id="inputSection">
-    <br>
-    Miner IDs (comma-separated): <input id="minerInput" type="text" placeholder="e.g. Z5XGT3EO,J0J8LTWT">
+  <h1>🚀 MinerMAX Terminal UI</h1>
+  <div id="output" class="terminal-border"></div>
+
+  <div class="section" id="inputSection">
+    <label>🔧 Enter Miner IDs (comma-separated)</label>
+    <input id="minerInput" type="text" placeholder="e.g. Z5XGT3EO,J0J8LTWT">
     <button onclick="startMining()">Start Mining</button>
+  </div>
+
+  <div class="section" id="statsSection">
+    <label>📊 Check Stats for a Miner</label>
+    <input id="statsInput" type="text" placeholder="e.g. JQIM3JXI">
+    <button onclick="fetchStats()">Check Stats</button>
   </div>
 
   <script>
@@ -71,7 +111,15 @@
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ blocks })
         });
-        return await res.json();
+        const result = await res.json();
+        if (result.accepted && result.accepted > 0) {
+          const timestamp = new Date().toLocaleString();
+          log(`🎉 ${timestamp} | Accepted blocks: ${result.accepted}`);
+          result.accepted_blocks?.forEach((b) => {
+            log(`✅ Miner: ${b.miner_id} | Hash: ${b.hash.slice(0, 12)}...`);
+          });
+        }
+        return result;
       } catch (e) {
         log("❌ Submission failed.");
         return {};
@@ -99,16 +147,16 @@
       minerIds = input.split(",").map(s => s.trim().toUpperCase()).filter(s => s);
       if (minerIds.length === 0) return alert("Enter at least one miner ID.");
       document.getElementById("inputSection").classList.add("hidden");
-      log("███████████████████████████████████████████████████████████████████████");
-      log("███╗   ███╗██╗███╗   ██╗███╗███╗███╗   ███╗███████╗███╗   ███╗ █████╗ ██╗  ██╗");
-      log("████╗ ████║██║████╗  ██║█████████║████╗ ████║██╔════╝████╗ ████║██╔══██╗██║ ██╔╝");
-      log("██╔████╔██║██║██╔██╗ ██║██╔██╔██║██╔████╔██║█████╗  ██╔████╔██║███████║█████╔╝ ");
-      log("██║╚██╔╝██║██║██║╚██╗██║██║╚═╝██║██║╚██╔╝██║██╔══╝  ██║╚██╔╝██║██╔══██║██╔═██╗ ");
-      log("██║ ╚═╝ ██║██║██║ ╚████║██║   ██║██║ ╚═╝ ██║███████╗██║ ╚═╝ ██║██║  ██║██║  ██╗");
-      log("╚═╝     ╚═╝╚═╝╚═╝  ╚═══╝╚═╝   ╚═╝╚═╝     ╚═╝╚══════╝╚═╝     ╚═╝╚═╝  ╚═╝╚═╝  ╚═╝");
-      log("───────────────────────────── Service by IAmPartGod -- Built for the Unemployed Miners! Tips welcome: $badhabits ─────────────────────────────");
+      log("🧠 Starting MinerMAX...");
       mineCycle();
       interval = setInterval(mineCycle, 49000);
+    }
+
+    function fetchStats() {
+      const minerId = document.getElementById("statsInput").value.trim().toUpperCase();
+      if (!minerId) return alert("Enter a miner ID to check stats.");
+      const url = `https://starch.one/miner/${minerId}`;
+      window.open(url, '_blank');
     }
   </script>
 </body>
