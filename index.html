@@ -14,7 +14,6 @@
       padding: 2rem;
       overflow-x: hidden;
     }
-
     #output {
       background-color: #111;
       color: #FFD700;
@@ -26,7 +25,6 @@
       box-shadow: 0 0 8px #FFD700;
       margin-bottom: 1rem;
     }
-
     input, button {
       background: #1a1a1a;
       color: #FFD700;
@@ -36,24 +34,20 @@
       font-family: 'VT323', monospace;
       font-size: 18px;
     }
-
     button:hover {
       background: #FFD700;
       color: #1a1a1a;
       cursor: pointer;
     }
-
     label {
       display: block;
       margin-top: 1rem;
       color: #FFD700;
       font-weight: bold;
     }
-
     .section {
       margin-bottom: 1.5rem;
     }
-
     h1 {
       color: #FFD700;
       text-shadow: 0 0 10px #FFD700;
@@ -63,16 +57,13 @@
       align-items: center;
       gap: 1rem;
     }
-
     h1 img {
       height: 48px;
     }
-
     .terminal-border {
       border: 1px dashed #444;
       padding: 1rem;
     }
-
     #minerStats {
       background: #111;
       border: 1px solid #444;
@@ -80,39 +71,40 @@
       margin-top: 1rem;
       font-size: 1rem;
     }
-
     .ascii {
       color: #888;
       font-size: 12px;
       margin-bottom: 1rem;
     }
-
+    .logo {
+      height: 40px;
+      vertical-align: middle;
+    }
     .animated-bg {
       position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
+      top: 0; left: 0; width: 100%; height: 100%;
       z-index: -1;
       background: url('https://starch.one/assets/images/bg_dust.png');
       background-size: cover;
       opacity: 0.04;
     }
-
-    .potato {
-      display: none;
-      height: 64px;
-      margin-top: 20px;
-      animation: spin 2s linear infinite;
+    #scrollTopBtn {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: #1a1a1a;
+      color: #FFD700;
+      border: 2px solid #FFD700;
+      padding: 8px 14px;
+      font-family: 'VT323', monospace;
+      font-size: 20px;
+      cursor: pointer;
+      box-shadow: 0 0 6px #FFD700;
+      z-index: 999;
     }
-
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
-
-    .center {
-      text-align: center;
+    #scrollTopBtn:hover {
+      background-color: #FFD700;
+      color: #1a1a1a;
     }
   </style>
 </head>
@@ -120,7 +112,7 @@
   <div class="animated-bg"></div>
 
   <h1>
-    <img src="https://cdn.dripdropz.io/token-logos/3d77d63dfa6033be98021417e08e3368cc80e67f8d7afa196aaa0b39.53746172636820546f6b656e-1704742254.5594.png" alt="Starch Token Logo" /> MinerMAX Auto-Miner Terminal 
+    <img src="https://cdn.dripdropz.io/token-logos/3d77d63dfa6033be98021417e08e3368cc80e67f8d7afa196aaa0b39.53746172636820546f6b656e-1704742254.5594.png" alt="Starch Logo" /> MinerMAX Terminal
   </h1>
 
   <div class="ascii">[BOOTING MINERMAX...]
@@ -131,7 +123,7 @@
   <div id="output" class="terminal-border"></div>
 
   <div class="section" id="inputSection">
-    <label>🔧 Enter Miner IDs (comma-separated, ensure spelling accuracy)</label>
+    <label>🔧 Enter Miner IDs (comma-separated)</label>
     <input id="minerInput" type="text" placeholder="e.g. Z5XGT3EO,J0J8LTWT">
     <button onclick="startMining()">Start Mining</button>
   </div>
@@ -144,15 +136,12 @@
 
   <div id="minerStats" class="hidden"></div>
 
-  <!-- Spinning Potato -->
-  <div class="center">
-    <img id="spinningPotato" src="https://media.tenor.com/xG5vORIFsCkAAAAi/potato-chips.gif" alt="Mining..." class="potato" />
+  <div class="section">
+    <label>💸 Tip Jar</label>
+    <div>$badhabits</div>
   </div>
 
-  <!-- Tip Jar -->
-  <div class="section center">
-    <label>💸 Like it? LOVE it? Support ya local dev <strong>$badhabits</strong></label>
-  </div>
+  <button onclick="scrollToTop()" id="scrollTopBtn">↑ Back to Top</button>
 
   <script>
     const output = document.getElementById("output");
@@ -220,7 +209,7 @@
         statsDiv.innerHTML = `📌 Miner ${minerId} has mined ${data.blocks.length} blocks this epoch.`;
       } catch (err) {
         statsDiv.classList.remove("hidden");
-        statsDiv.innerHTML = `❌ Failed to fetch stats for ${minerId} - WIP`;
+        statsDiv.innerHTML = `❌ Failed to fetch stats for ${minerId}`;
       }
     }
 
@@ -245,12 +234,13 @@
       minerIds = input.split(",").map(s => s.trim().toUpperCase()).filter(s => s);
       if (minerIds.length === 0) return alert("Enter at least one miner ID.");
       document.getElementById("inputSection").classList.add("hidden");
-
-      document.getElementById("spinningPotato").style.display = "inline-block";
-
       log("🧠 Starting MinerMAX...");
       mineCycle();
       interval = setInterval(mineCycle, 49000);
+    }
+
+    function scrollToTop() {
+      window.scrollTo({ top: 0, behavior: "smooth" });
     }
   </script>
 </body>
